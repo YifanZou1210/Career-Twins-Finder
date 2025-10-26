@@ -7,6 +7,18 @@ from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).parent))
 
+# 检查是否在Streamlit Cloud上运行
+if not Path('processed_data/tech_profiles.pkl').exists():
+    st.info("First time setup: Creating demo data...")
+
+    # 创建demo数据
+    import create_demo_data
+    create_demo_data.create_demo_profiles(500)
+
+    st.success("Demo data created!")
+    st.experimental_rerun()
+
+
 from src.feature_engine import FeatureEngine
 from src.matcher import CareerMatcher
 from src.utils import load_profiles, format_salary
