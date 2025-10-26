@@ -5,18 +5,65 @@ import plotly.express as px
 import plotly.graph_objects as go
 from pathlib import Path
 import sys
+import os
+import pickle
+import random
 sys.path.append(str(Path(__file__).parent))
 
-# 检查是否在Streamlit Cloud上运行
-if not Path('processed_data/tech_profiles.pkl').exists():
-    st.info("First time setup: Creating demo data...")
+# 检查数据文件是否存在
+data_file = Path('processed_data/tech_profiles.pkl')
+if not data_file.exists():
+    st.info("🔄 First time setup: Creating demo data...")
 
-    # 创建demo数据
-    import create_demo_data
-    create_demo_data.create_demo_profiles(500)
+    # 确保目录存在
+    Path('processed_data').mkdir(exist_ok=True)
 
-    st.success("Demo data created!")
-    st.experimental_rerun()
+    # 创建演示数据
+    profiles = []
+
+    roles = ['Software Engineer', 'Senior Developer', 'Data Scientist',
+             'Frontend Developer', 'Backend Engineer', 'DevOps Engineer',
+             'Full Stack Developer', 'ML Engineer', 'Tech Lead']
+
+    companies = ['Google', 'Amazon', 'Microsoft', 'Meta', 'Apple',
+                 'Netflix', 'Uber', 'Airbnb', 'Stripe', 'Databricks']
+
+    skills_pool = ['Python', 'Java', 'JavaScript', 'React', 'Node.js',
+                   'AWS', 'Docker', 'Kubernetes', 'SQL', 'MongoDB',
+                   'TypeScript', 'Go', 'Machine Learning', 'Git']
+
+    locations = ['San Francisco, CA', 'New York, NY', 'Seattle, WA',
+                 'Austin, TX', 'Boston, MA', 'Remote']
+
+    for i in range(200):  # 200个profiles足够演示
+        level = random.randint(1, 4)
+        num_skills = min(level * 2 + random.randint(1, 3), 8)
+
+        profile = {
+            'profile_id': f'demo_{i:06d}',
+            'current_role': random.choice(roles),
+            'current_company': random.choice(companies),
+            'location': random.choice(locations),
+            'skills': random.sample(skills_pool, k=num_skills),
+            'experience_level': level,
+            'career_path': [
+                {'role': 'Junior Developer', 'duration': 2},
+                {'role': 'Software Engineer', 'duration': 3}
+            ],
+            'work_type': 'Full-time',
+            'remote_allowed': random.choice([0, 1]),
+            'industry': 'Technology',
+            'specialization': random.choice(['Frontend', 'Backend', 'Full Stack', 'Data/ML']),
+            'company_type': random.choice(['FAANG', 'Unicorn', 'Startup'])
+        }
+        profiles.append(profile)
+
+    # 保存数据
+    with open(data_file, 'wb') as f:
+        pickle.dump(profiles, f)
+
+    st.success("✅ Demo data created!")
+    st.rerun()  # 使用 st.rerun() 而不是 st.experimental_rerun()
 
 
 from src.feature_engine import FeatureEngine
